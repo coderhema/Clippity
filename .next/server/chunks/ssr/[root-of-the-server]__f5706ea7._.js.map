@@ -1,0 +1,1 @@
+{"version":3,"sources":["turbopack:///[project]/src/app/dashboard/page.tsx"],"sourcesContent":["export default function page() {\n  return <div>This is the dashboard page</div>;\n}\n"],"names":[],"mappings":"mRAAe,SAAS,IACtB,MAAO,CAAA,EAAA,EAAA,GAAA,EAAC,MAAA,UAAI,8BACd"}
