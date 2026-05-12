@@ -53,10 +53,16 @@ export class MemoryClippityStore {
     return next;
   }
 
+  claimJob(id: string) {
+    const job = this.jobs.get(id);
+    if (!job || job.status !== 'queued') return null;
+    return this.update(id, { status: 'running' as ClippityJobStatus });
+  }
+
   claimNextQueuedJob() {
     const next = this.list().find((job) => job.status === 'queued');
     if (!next) return null;
-    return this.update(next.id, { status: 'running' as ClippityJobStatus });
+    return this.claimJob(next.id);
   }
 }
 
