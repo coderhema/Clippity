@@ -60,8 +60,8 @@ export async function processClippityJob(job: ClippityJobRecord): Promise<Clippi
   }
 }
 
-export async function runWorkerTick() {
-  const job = clippityStore.claimNextQueuedJob();
+export async function runWorkerTick(jobId?: string) {
+  const job = jobId ? clippityStore.claimJob(jobId) : clippityStore.claimNextQueuedJob();
   if (!job) {
     return null;
   }
