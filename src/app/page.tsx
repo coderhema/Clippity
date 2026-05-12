@@ -1,103 +1,78 @@
-import Image from "next/image";
+const pillars = [
+  {
+    title: 'Plugin-first editing',
+    body: 'One editing core, many surfaces: Premiere Pro, Blender, chatrooms, and agent tools all share the same job contract.',
+  },
+  {
+    title: 'Daemon / worker split',
+    body: 'Heavy transcription, scene detection, and rhythm analysis stay in the worker layer while the daemon coordinates execution.',
+  },
+  {
+    title: 'Skills for AI agents',
+    body: 'Beats-to-clips, clipping, reframing, rhythm matching, and transcription are exposed as callable skills anywhere.',
+  },
+  {
+    title: 'Beats-to-clips core',
+    body: 'Clippity converts raw footage into high-taste sequences that track beats, scene boundaries, and framing intent.',
+  },
+];
+
+const surfaces = ['Premiere Pro', 'Blender', 'Chatrooms', 'Agent APIs'];
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className='min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_35%),linear-gradient(180deg,_#09090b_0%,_#111114_100%)] text-white'>
+      <section className='mx-auto flex min-h-screen w-full max-w-7xl flex-col justify-center px-6 py-16 sm:px-10 lg:px-16'>
+        <div className='mb-10 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 backdrop-blur'>
+          Unsiloed video editing, built for anywhere
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <div className='grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-start'>
+          <div className='space-y-6'>
+            <h1 className='max-w-4xl text-5xl font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl'>
+              Clippity turns editing into a modular system that travels with the user.
+            </h1>
+            <p className='max-w-2xl text-lg leading-8 text-white/70 sm:text-xl'>
+              The same core powers plugin surfaces, chat-driven edits, and AI-agent skills so rhythm matching,
+              clipping, scene detection, transcription, and reframing can run without silos.
+            </p>
+
+            <div className='flex flex-wrap gap-3'>
+              {surfaces.map((surface) => (
+                <span key={surface} className='rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80'>
+                  {surface}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className='rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30 backdrop-blur'>
+            <p className='text-sm uppercase tracking-[0.28em] text-white/45'>Core feature</p>
+            <h2 className='mt-3 text-2xl font-semibold'>Beats to clips</h2>
+            <p className='mt-3 text-sm leading-7 text-white/70'>
+              Heavy work is split into daemon and worker responsibilities so long-running transcription and scene
+              detection stay modular, swappable, and agent-callable.
+            </p>
+            <div className='mt-6 space-y-3'>
+              {['scene detection', 'whisper-style transcription', 'rhythm matching', 'clipsai reframing'].map((item) => (
+                <div key={item} className='flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/80'>
+                  <span>{item}</span>
+                  <span className='text-white/35'>ready for plugins</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className='mt-14 grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
+          {pillars.map((pillar) => (
+            <article key={pillar.title} className='rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur'>
+              <h3 className='text-lg font-medium'>{pillar.title}</h3>
+              <p className='mt-3 text-sm leading-7 text-white/68'>{pillar.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
