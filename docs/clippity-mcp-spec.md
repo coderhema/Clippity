@@ -9,6 +9,7 @@ Expose Clippity's editing capabilities as Model Context Protocol tools so multip
 - Composable: tools can be called independently or orchestrated in sequence.
 - Traceable: every output includes source media, parameters, and provenance.
 - Agent-friendly: tools return machine-readable artifacts plus concise human summaries.
+- Async for heavy work: compute-intensive tasks are queued to a daemon/worker, not blocked inside the MCP server.
 
 ## Core concept
 The server treats a clip as a shared workspace with a stable clip id. Tools do not hide intermediate results. Instead, they publish artifacts that other agents can consume:
@@ -18,6 +19,7 @@ The server treats a clip as a shared workspace with a stable clip id. Tools do n
 - reframed compositions
 - render jobs
 - provenance metadata
+- queue/job records
 
 This keeps editing work unsiloed across specialized agents.
 
@@ -30,14 +32,77 @@ clippity-mcp
 - scenes://{clip_id}
 - rhythm-map://{clip_id}
 - reframed-video://{clip_id}
+- job://{job_id}
+- queue://{queue_name}
 - artifacts://{clip_id}/{artifact_id}
 
 Resources should be read-only views over the shared workspace.
+
+## Runtime architecture
+The system is split into three cooperating layers:
+
+1. MCP API layer
+- Accepts tool calls from any AI agent.
+- Validates inputs and permissions.
+- Enqueues heavy work.
+- Returns job handles and references to shared artifacts.
+
+2. Daemon / worker layer
+- Pulls queued jobs.
+- Performs heavy processing such as Whisper transcription and PySceneDetect.
+- Writes artifacts back to the shared workspace.
+- Emits status updates and provenance.
+
+3. Shared artifact store
+- Persistent store for transcripts, scenes, cuts, renders, and job metadata.
+- Makes intermediate outputs visible and reusable by all agents.
+
+This structure is intentionally unsiloed: the MCP layer never owns the full editing pipeline, and the worker never hides outputs from other agents.
+
+## Daemon responsibilities
+The daemon should handle:
+- Whisper transcription
+- PySceneDetect analysis
+- long-running rendering jobs
+- retry handling
+- status transitions
+- artifact publication
+- job deduplication when possible
+
+The daemon should not:
+- own the user-facing workflow exclusively
+- hide intermediate artifacts
+- overwrite source media
+- force a single monolithic edit pipeline
+
+## Queue model
+Heavy tools should queue jobs instead of running synchronously.
+
+Suggested job fields:
+- job_id
+- clip_id
+- tool_name
+- status: queued | running | succeeded | failed | canceled
+- priority
+- inputs
+- created_at
+- updated_at
+- artifact_ids
+- error
+- attempts
+- worker_id
+
+Suggested queues:
+- transcribe
+- scene-detect
+- render
+- general
 
 ## Tools
 
 ### 1) transcribe_audio
 Purpose: run Whisper transcription on source media.
+Execution model: enqueue a daemon job and return a job handle immediately.
 Inputs:
 - clip_id
 - media_url or media_ref
@@ -45,13 +110,15 @@ Inputs:
 - prompt?
 - timestamps? default true
 Outputs:
-- transcript artifact
+- job_id
+- transcript artifact when complete
 - segments with timestamps
 - confidence metadata
 - provenance
 
 ### 2) detect_scenes
 Purpose: run PySceneDetect to segment video into scenes.
+Execution model: enqueue a daemon job and return a job handle immediately.
 Inputs:
 - clip_id
 - media_url or media_ref
@@ -59,13 +126,15 @@ Inputs:
 - threshold?
 - min_scene_len?
 Outputs:
-- scenes artifact
+- job_id
+- scenes artifact when complete
 - scene boundaries
 - shot summaries if available
 - provenance
 
 ### 3) match_rhythm
 Purpose: analyze pacing and align edits to speech or music rhythm.
+Execution model: may run synchronously for lightweight analysis, but should also support queued execution for long inputs.
 Inputs:
 - clip_id
 - transcript_ref?
@@ -81,6 +150,7 @@ Outputs:
 
 ### 4) reframe_clip
 Purpose: use ClipsAI-style reframing for crop and subject tracking.
+Execution model: can queue if the media is large or if batch exports are requested.
 Inputs:
 - clip_id
 - media_url or media_ref
@@ -95,6 +165,7 @@ Outputs:
 
 ### 5) compose_edit
 Purpose: orchestrate the above tools into a single edit plan without hiding intermediate artifacts.
+Execution model: creates a dependency graph and enqueues child jobs rather than collapsing everything into one private pipeline.
 Inputs:
 - clip_id
 - objective
@@ -106,6 +177,7 @@ Outputs:
 
 ### 6) render_export
 Purpose: render a final deliverable from accumulated artifacts.
+Execution model: always queued.
 Inputs:
 - clip_id
 - timeline_ref or edit_plan_ref
@@ -115,10 +187,11 @@ Outputs:
 - export asset
 - render logs
 - checksum
+- job_id
 
-## Tool contract principles
+## Worker/tool contract principles
 Every tool response should include:
-- artifact_id
+- artifact_id or job_id
 - clip_id
 - status
 - inputs_used
@@ -126,23 +199,35 @@ Every tool response should include:
 - provenance
 - next_recommended_action
 
+If the work is queued, the tool must return immediately with a job handle and enough metadata for another agent to inspect or continue the workflow later.
+
+## Status and polling resources
+To keep the system unsiloed and inspectable, the MCP server should expose:
+- job://{job_id}
+- queue://{queue_name}
+- artifacts://{clip_id}/{artifact_id}
+
+These resources let multiple agents coordinate without asking a single orchestrator for private state.
+
 ## Data model
 A minimal shared object model:
 - Clip: the canonical workspace
 - MediaAsset: original upload or linked source
 - Artifact: any derived output
 - Job: async processing task
+- Queue: dispatch lane for workers
 - Provenance: inputs, model versions, parameters, timestamps
 
 ## Unsiloed workflow
-1. One agent transcribes the clip.
-2. Another agent uses the transcript to find rhythm.
-3. A third agent detects scenes and proposes cut boundaries.
-4. A reframing agent generates vertical or square variants.
-5. A coordinating agent composes all artifacts into an edit plan.
-6. Any agent can inspect or reuse the intermediate artifacts later.
+1. One agent uploads or references media in the shared clip workspace.
+2. The MCP layer queues Whisper transcription and PySceneDetect jobs.
+3. The daemon publishes transcript and scene artifacts back to the shared store.
+4. Another agent consumes those artifacts to find rhythm and propose cuts.
+5. A reframing agent generates vertical or square variants.
+6. A coordinating agent composes all artifacts into an edit plan.
+7. Any agent can inspect, reuse, or extend the intermediate artifacts later.
 
-No stage should force a single monolithic pipeline. Each stage must remain independently callable and reusable.
+No stage should force a single monolithic pipeline. Each stage must remain independently callable, inspectable, and reusable.
 
 ## Safety and reliability
 - Non-destructive by default.
@@ -150,6 +235,7 @@ No stage should force a single monolithic pipeline. Each stage must remain indep
 - All transforms create new artifacts.
 - Tool outputs must be deterministic where possible, or expose seeds and versions.
 - Large media jobs should be async with polling or subscription support.
+- Queue retries must be idempotent where possible.
 
 ## Transport and authentication
 - MCP over standard transport.
@@ -158,13 +244,15 @@ No stage should force a single monolithic pipeline. Each stage must remain indep
 
 ## Suggested implementation layout
 - server.ts: MCP server entrypoint
+- daemon.ts: background worker entrypoint
+- queue.ts: job enqueue/dequeue abstraction
 - tools/transcribe_audio.ts
 - tools/detect_scenes.ts
 - tools/match_rhythm.ts
 - tools/reframe_clip.ts
 - tools/compose_edit.ts
 - tools/render_export.ts
-- resources/*.ts for clip and artifact views
+- resources/*.ts for clip, job, and artifact views
 
 ## Recommended next step
-Implement the MCP server with the four editing tools as standalone skills, then add compose_edit as the orchestrator layer.
+Implement the MCP server with queued heavy tasks and the daemon worker first, then add compose_edit as the orchestrator layer.
