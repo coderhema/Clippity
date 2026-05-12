@@ -68,7 +68,7 @@ export default function Home() {
           {pillars.map((pillar) => (
             <article key={pillar.title} className='rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur'>
               <h3 className='text-lg font-medium'>{pillar.title}</h3>
-              <p className='mt-3 text-sm leading-7 text-white/68'>{pillar.body}</p>
+              <p className='mt-3 text-sm leading-7 text-white/70'>{pillar.body}</p>
             </article>
           ))}
         </div>
