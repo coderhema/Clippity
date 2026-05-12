@@ -9,7 +9,7 @@ export function submitClippityJob(request: ClippityJobRequest) {
 
 export async function submitAndProcessClippityJob(request: ClippityJobRequest) {
   const job = submitClippityJob(request);
-  return runWorkerTick() ?? job;
+  return runWorkerTick(job.id) ?? job;
 }
 
 export function getClippityManifest() {
