@@ -171,6 +171,32 @@ export function buildBeatsToClipsPlan(input: ClippityJobInput): ClipPlan {
   };
 }
 
+export function buildWordClipPlan(input: ClippityJobInput): ClipPlan {
+  const basePlan = buildBeatsToClipsPlan(input);
+  const targetWord = input.targetWord?.trim();
+
+  if (!targetWord) {
+    return {
+      ...basePlan,
+      summary: 'Word-clip requested without a target word; returning the default beats-to-clips plan.',
+      agentNotes: [...basePlan.agentNotes, 'word-clip: no targetWord provided'],
+    };
+  }
+
+  const matcher = new RegExp(`\\b${targetWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+  const matchingSegments = basePlan.transcriptSegments.filter((segment) => matcher.test(segment.text));
+  const matchingClips = basePlan.clips.filter((clip) =>
+    matchingSegments.some((segment) => clip.sourceStart <= segment.end && clip.sourceEnd >= segment.start),
+  );
+
+  return {
+    ...basePlan,
+    summary: `Word-clip plan for "${targetWord}" with ${matchingClips.length} matching clip(s).`,
+    clips: matchingClips,
+    agentNotes: [...basePlan.agentNotes, `word-clip: target "${targetWord}" matched ${matchingSegments.length} transcript segment(s)`],
+  };
+}
+
 export function transcribeJobFallback(input: ClippityJobInput) {
   return normalizeTranscriptSegments(input);
 }

@@ -1,5 +1,5 @@
 export type EditorEnvironment = 'premiere-pro' | 'blender' | 'chatroom' | 'agent';
-export type ClippityJobKind = 'beats-to-clips' | 'transcribe' | 'scene-detect' | 'rhythm-match' | 'reframe' | 'plugin-edit';
+export type ClippityJobKind = 'beats-to-clips' | 'transcribe' | 'scene-detect' | 'rhythm-match' | 'reframe' | 'plugin-edit' | 'word-clip';
 export type ClippityJobStatus = 'queued' | 'running' | 'succeeded' | 'failed';
 
 export interface MediaSource {
@@ -72,6 +72,7 @@ export interface ClippityJobInput {
   source?: MediaSource;
   transcriptText?: string;
   transcriptSegments?: TranscriptSegment[];
+  targetWord?: string;
   scenes?: SceneCut[];
   beats?: RhythmBeat[];
   aspectRatio?: string;

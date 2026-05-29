@@ -18,6 +18,12 @@ export const agentSkills: AgentSkillDefinition[] = [
     jobKinds: ['beats-to-clips'],
   },
   {
+    id: 'word-clip',
+    description: 'Find target word mentions in transcript text and clip only those moments.',
+    environments: ['agent', 'chatroom', 'premiere-pro', 'blender'],
+    jobKinds: ['word-clip'],
+  },
+  {
     id: 'transcription',
     description: 'Transcribe media into reusable transcript segments for downstream editing.',
     environments: ['agent', 'chatroom', 'premiere-pro', 'blender'],
@@ -96,7 +102,7 @@ export const pluginAdapters: ClippityPluginAdapter[] = [
     description: 'Expose clip planning as agent-callable skills.',
     canHandle: () => true,
     adapt: (plan, job) => makePluginResult('agent', job, plan.summary, {
-      toolSurface: ['beats-to-clips', 'transcribe', 'scene-detect', 'rhythm-match', 'reframe'],
+      toolSurface: ['beats-to-clips', 'word-clip', 'transcribe', 'scene-detect', 'rhythm-match', 'reframe'],
       clipPlan: plan,
       callableAnywhere: true,
     }),
