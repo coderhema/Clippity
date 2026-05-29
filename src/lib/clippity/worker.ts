@@ -1,4 +1,4 @@
-import { buildBeatsToClipsPlan, detectScenesFallback, reframeJobFallback, rhythmMatchFallback, transcribeJobFallback } from './pipeline';
+import { buildBeatsToClipsPlan, buildWordClipPlan, detectScenesFallback, reframeJobFallback, rhythmMatchFallback, transcribeJobFallback } from './pipeline';
 import { getPluginAdapter } from './registry';
 import type { ClippityJobRecord } from './types';
 import { clippityStore } from './store';
@@ -34,6 +34,9 @@ export async function processClippityJob(job: ClippityJobRecord): Promise<Clippi
         result = getPluginAdapter(job.environment).adapt(plan, job);
         break;
       }
+      case 'word-clip':
+        result = buildWordClipPlan(job.input);
+        break;
       default:
         result = buildBeatsToClipsPlan(job.input);
         break;

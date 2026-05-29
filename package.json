@@ -2,13 +2,20 @@
   "name": "clippity",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:mobile": "npm run start --workspace @clippity/mobile",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint src next.config.ts eslint.config.mjs",
+    "mobile:typecheck": "npm run typecheck --workspace @clippity/mobile"
   },
   "dependencies": {
+    "@clippity/shared": "file:packages/shared",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",

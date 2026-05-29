@@ -1,24 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Clippity is now a multi-surface workspace:
+
+- `.` → Next.js web/admin surface
+- `apps/mobile` → Expo React Native mobile clipping surface
+- `packages/shared` → shared Clippity contracts/types used across surfaces
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies from the repo root:
+
+```bash
+npm install
+```
+
+Run the web app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the React Native app:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:mobile
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Quality checks:
+
+```bash
+npm run lint
+npm run build
+npm run mobile:typecheck
+```
 
 ## Learn More
 
