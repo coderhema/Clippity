@@ -29,7 +29,7 @@ const workspacePanels = [
   },
 ];
 
-export default function page() {
+export default function Page() {
   return (
     <section className="min-h-screen bg-zinc-950 px-6 py-8 text-zinc-100 sm:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
