@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import { Video, ResizeMode } from 'expo-av';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { listClippityJobs, pollClippityJob, submitClippityJob } from './src/lib/clippity-api';
 import {
   Alert,
   LayoutChangeEvent,
@@ -64,48 +65,6 @@ const demoScenes = [0.1, 0.29, 0.57, 0.88];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function fetchClippity<T>(apiBase: string, token: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBase}/api/clippity`, {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      authorization: token ? `****** : '',
-      ...(init?.headers ?? {}),
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Clippity API failed (${response.status})`);
-  }
-  return response.json() as Promise<T>;
-}
-
-async function submitJob(apiBase: string, token: string, request: ClippityJobRequest) {
-  return fetchClippity<{ mode: string; job: ClippityJobRecord }>(apiBase, token, {
-    method: 'POST',
-    body: JSON.stringify({ ...request, mode: 'process' }),
-  });
-}
-
-async function listJobs(apiBase: string, token: string) {
-  return fetchClippity<{ jobs: ClippityJobRecord[] }>(apiBase, token, { method: 'GET' });
-}
-
-async function pollJob(apiBase: string, token: string, jobId: string, maxAttempts = 10) {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const jobs = await listJobs(apiBase, token);
-    const match = jobs.jobs.find((job) => job.id === jobId);
-    if (match && match.status !== 'queued' && match.status !== 'running') {
-      return match;
-    }
-    await delay(1200);
-  }
-  return null;
 }
 
 export default function App() {
@@ -200,7 +159,7 @@ export default function App() {
   async function refreshJobs() {
     if (!token) return;
     try {
-      const result = await listJobs(apiBase, token);
+      const result = await listClippityJobs(apiBase, token);
       setJobs(result.jobs);
     } catch (error) {
       Alert.alert('Sync failed', error instanceof Error ? error.message : 'Unable to load jobs.');
@@ -212,7 +171,7 @@ export default function App() {
     const queued = [...queue];
     for (const item of queued) {
       try {
-        await submitJob(apiBase, token, item.request);
+        await submitClippityJob(apiBase, token, item.request);
         setQueue((current) => current.filter((entry) => entry.id !== item.id));
       } catch {
         break;
@@ -258,8 +217,8 @@ export default function App() {
     };
 
     try {
-      const result = await submitJob(apiBase, token, request);
-      const completed = await pollJob(apiBase, token, result.job.id);
+      const result = await submitClippityJob(apiBase, token, request);
+      const completed = await pollClippityJob(apiBase, token, result.job.id);
       await refreshJobs();
       setScreen('progress');
       if (completed?.status === 'succeeded') {
