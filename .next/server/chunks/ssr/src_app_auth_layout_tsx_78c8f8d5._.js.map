@@ -1,1 +1,1 @@
-{"version":3,"sources":[],"names":[],"mappings":""}
+{"version":3,"sources":["turbopack:///[project]/src/app/auth/layout.tsx"],"sourcesContent":["export default function AuthLayout({\n  children,\n}: Readonly<{\n  children: React.ReactNode;\n}>) {\n  return children;\n}"],"names":[],"mappings":"uCAAe,SAAS,EAAW,UACjC,CAAQ,CAGR,EACA,OAAO,CACT"}
