@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/clippity/jobs/route": "/api/clippity/jobs",
+  "/api/clippity/route": "/api/clippity",
+  "/api/clippity/skills/route": "/api/clippity/skills",
+  "/auth/login/page": "/auth/login",
+  "/auth/signup/page": "/auth/signup",
+  "/dashboard/library/page": "/dashboard/library",
+  "/dashboard/page": "/dashboard",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}
