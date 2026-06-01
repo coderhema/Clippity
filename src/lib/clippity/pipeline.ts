@@ -3,6 +3,7 @@ import type {
   ClipPlanItem,
   ClippityJobInput,
   MediaSource,
+  ReframeDirective,
   RhythmBeat,
   SceneCut,
   TranscriptSegment,
@@ -121,8 +122,9 @@ export function matchRhythmToScenes(sceneCuts: SceneCut[], beats: RhythmBeat[]) 
   });
 }
 
-function reframingForAspectRatio(aspectRatio: string, index: number) {
-  const focalPoint = aspectRatio === '9:16' || aspectRatio === '4:5' ? 'speaker' : index % 2 === 0 ? 'center' : 'rule-of-thirds';
+function reframingForAspectRatio(aspectRatio: string, index: number): ReframeDirective {
+  const focalPoint: ReframeDirective['focalPoint'] =
+    aspectRatio === '9:16' || aspectRatio === '4:5' ? 'speaker' : index % 2 === 0 ? 'center' : 'rule-of-thirds';
   return {
     aspectRatio,
     focalPoint,
